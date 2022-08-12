@@ -40,15 +40,13 @@ class WelcomeViewController: UIViewController {
     }
     @objc func didTapSignIn() {
         let vc = AuthViewController()
+        vc.navigationItem.largeTitleDisplayMode = .never
+        navigationController?.pushViewController(vc, animated: true)
         vc.completionHandler = { success in
             DispatchQueue.main.async {
                 self.handleSignIn(success: success)
             }
-            
         }
-        
-        vc.navigationItem.largeTitleDisplayMode = .never
-        navigationController?.pushViewController(vc, animated: true)
     }
     private func handleSignIn(success: Bool) {
         guard success else {
@@ -58,7 +56,6 @@ class WelcomeViewController: UIViewController {
             return
             
         }
-        
         let mainAppTabBarVC = TabBarViewController()
         mainAppTabBarVC.modalPresentationStyle = .fullScreen
         present(mainAppTabBarVC, animated: true)
