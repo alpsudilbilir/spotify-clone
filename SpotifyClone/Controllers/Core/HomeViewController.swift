@@ -51,7 +51,6 @@ class HomeViewController: UIViewController {
                     }
                 }
                 APIManager.shared.getRecommendations(genres: seeds) { result in
-                    
                 }
             case .failure(let error): break
             }

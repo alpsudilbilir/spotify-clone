@@ -100,7 +100,7 @@ final class APIManager {
                     let result = try JSONDecoder().decode(RecommendedGenresResponse.self, from: data)
                     completion(.success(result))
                 } catch {
-                    completion(.failure(APIError.failedToGetData))
+                    completion(.failure(error))
                 }
 
             }
@@ -108,19 +108,19 @@ final class APIManager {
         }
     }
     
-    func getRecommendations(genres: Set<String>, completion: @escaping (Result<String, Error>) -> Void) {
+    func getRecommendations(genres: Set<String>, completion: @escaping (Result<RecommendationsResponse, Error>) -> Void) {
         let seeds = genres.joined(separator: ",")
-        createRequest(with: URL(string: Constants.baseAPIURL + "/recommendations?seed_genres=\(seeds)"), type: .GET) { request in
+        createRequest(with: URL(string: Constants.baseAPIURL + "/recommendations?limit=40&seed_genres=\(seeds)"), type: .GET) { request in
             let task = URLSession.shared.dataTask(with: request) { data, _, err in
                 guard let data = data else {
                     completion(.failure(APIError.failedToGetData))
                     return
                 }
                 do {
-                    let result = try JSONSerialization.jsonObject(with: data, options: .allowFragments)
-                    print(result)
+                    let result = try JSONDecoder().decode(RecommendationsResponse.self, from: data)
+                    completion(.success(result))
                 } catch {
-                    completion(.failure(APIError.failedToGetData))
+                    completion(.failure(error))
                 }
             }
             task.resume()
