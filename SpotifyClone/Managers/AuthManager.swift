@@ -90,13 +90,13 @@ final class AuthManager {
         task.resume()
     }
     private var onRefreshBlocks = [((String) -> Void)]()
-    public func withValidToken(completion: @escaping (String) -> Void) {
+    public func withValidToken(completion: @escaping ((String) -> Void)) {
         guard !refreshingToken else {
             onRefreshBlocks.append(completion)
             return
         }
         if shouldRefreshToken {
-            refreshAccessToken { [weak self] success in
+            refreshAccesTokenIfNeccessary { [weak self] success in
                 if success {
                     if let token = self?.accessToken {
                         completion(token)
@@ -107,10 +107,10 @@ final class AuthManager {
             completion(token)
         }
     }
-    public func refreshAccessToken(completion: @escaping (Bool) -> Void) {
+    public func refreshAccesTokenIfNeccessary(completion: ((Bool) -> Void)?) {
         guard !refreshingToken else { return }
         guard shouldRefreshToken else {
-            completion(true)
+            completion?(true)
             return
         }
         guard let refreshToken = self.refreshToken else { return }
@@ -135,7 +135,7 @@ final class AuthManager {
         let task = URLSession.shared.dataTask(with: request) { [weak self] data, _, err in
             self?.refreshingToken = false
             guard let data = data else {
-                completion(false)
+                completion?(false)
                 return
             }
             do {
@@ -143,10 +143,10 @@ final class AuthManager {
                 self?.onRefreshBlocks.forEach( { $0(result.access_token)})
                 self?.onRefreshBlocks.removeAll()
                 self?.cacheToken(result: result)
-                completion(true)
+                completion?(true)
             } catch {
                 print(err?.localizedDescription)
-                completion(false)
+                completion?(false)
             }
         }
         task.resume()
