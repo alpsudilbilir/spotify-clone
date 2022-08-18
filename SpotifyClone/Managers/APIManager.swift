@@ -10,7 +10,7 @@ import Foundation
 final class APIManager {
     static let shared = APIManager()
     
-    private init() { }
+    private init() { }
     
     struct Constants {
         static let baseAPIURL = "https://api.spotify.com/v1"
@@ -73,7 +73,7 @@ final class APIManager {
         }
     }
     func getFeaturedPlaylists(completion: @escaping (Result<FeaturedPlaylistsResponse, Error>) -> Void) {
-        createRequest(with: URL(string: Constants.baseAPIURL + "/browse/featured-playlists?country=US"), type: .GET) { request in
+        createRequest(with: URL(string: Constants.baseAPIURL + "/browse/featured-playlists?country=TR"), type: .GET) { request in
             let task = URLSession.shared.dataTask(with: request) { data, _, err in
                 guard let data = data else {
                     completion(.failure(APIError.failedToGetData))
