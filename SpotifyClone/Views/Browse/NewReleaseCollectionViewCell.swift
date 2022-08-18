@@ -7,6 +7,7 @@
 
 import UIKit
 import SDWebImage
+import SwiftUI
 
 class NewReleaseCollectionViewCell: UICollectionViewCell {
     static let identifier = "NewReleaseCollectionViewCell"
@@ -48,6 +49,7 @@ class NewReleaseCollectionViewCell: UICollectionViewCell {
         contentView.addSubview(artistNameLabel)
         contentView.addSubview(numberOfTracksLabel)
         contentView.addSubview(albumCoverImageView)
+        
         contentView.clipsToBounds = true
     }
     
@@ -89,6 +91,7 @@ class NewReleaseCollectionViewCell: UICollectionViewCell {
             y: artistNameLabel.bottom +  4,
             width: numberOfTracksLabel.width,
             height: numberOfTracksLabel.heigth)
+
     }
     override func prepareForReuse() {
         super.prepareForReuse()
