@@ -9,8 +9,8 @@ import UIKit
 
 enum BrowseSectionType {
     case newReleases(viewModels: [NewReleasesCellViewModel])
-    case featuredPlaylists(viewModels: [FeaturedPlaylistsCollectionViewCell])
-    case recommendedTracks(viewModels: [RecommendedTrackCollectionViewCell])
+    case featuredPlaylists(viewModels: [FeaturedPlaylistCellViewModel])
+    case recommendedTracks(viewModels: [RecommendedTrackCellViewModel])
 }
 class HomeViewController: UIViewController {
     
@@ -40,31 +40,6 @@ class HomeViewController: UIViewController {
         view.addSubview(spinner)
         fetchData()
     }
-    private func configureCollectionView() {
-        view.addSubview(collectionView)
-//        collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "cell")
-        collectionView.register(NewReleaseCollectionViewCell.self,
-                                forCellWithReuseIdentifier: NewReleaseCollectionViewCell.identifier)
-        collectionView.register(FeaturedPlaylistsCollectionViewCell.self,
-                                forCellWithReuseIdentifier: FeaturedPlaylistsCollectionViewCell.identifier)
-        collectionView.register(RecommendedTrackCollectionViewCell.self,
-                                forCellWithReuseIdentifier: RecommendedTrackCollectionViewCell.identifier)
-        collectionView.dataSource = self
-        collectionView.delegate = self
-        collectionView.backgroundColor = .systemBackground
-    }
-    
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        collectionView.frame = view.bounds
-    }
-    @objc func didTapSettings() {
-        let vc = SettingsViewController()
-        vc.title = "Settings"
-        vc.navigationItem.largeTitleDisplayMode = .never
-        navigationController?.pushViewController(vc, animated: true)
-    }
-    
     private func fetchData() {
         let group = DispatchGroup()
         group.enter()
@@ -100,7 +75,7 @@ class HomeViewController: UIViewController {
         }
         //Recommended
         APIManager.shared.getRecommendedGenres { result in
-        
+            
             switch result {
             case .success(let model):
                 let genres = model.genres
@@ -131,21 +106,58 @@ class HomeViewController: UIViewController {
                   let playlists = featuredPlaylists?.playlists.items,
                   let tracks = recommendedTracks?.tracks
             else { return }
-            self.configureModels(newAlbums: releases,
-                                 playlists: playlists,
-                                 tracks: tracks)
+            self.configureViewModels(newAlbums: releases,
+                                     playlists: playlists,
+                                     tracks: tracks)
             
         }
     }
-    private func configureModels(newAlbums: [Album], playlists: [Playlist], tracks: [AudioTrack]) {
+    
+    private func configureCollectionView() {
+        view.addSubview(collectionView)
+        collectionView.register(NewReleaseCollectionViewCell.self,
+                                forCellWithReuseIdentifier: NewReleaseCollectionViewCell.identifier)
+        collectionView.register(FeaturedPlaylistsCollectionViewCell.self,
+                                forCellWithReuseIdentifier: FeaturedPlaylistsCollectionViewCell.identifier)
+        collectionView.register(RecommendedTrackCollectionViewCell.self,
+                                forCellWithReuseIdentifier: RecommendedTrackCollectionViewCell.identifier)
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        collectionView.backgroundColor = .systemBackground
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        collectionView.frame = view.bounds
+    }
+    @objc func didTapSettings() {
+        let vc = SettingsViewController()
+        vc.title = "Settings"
+        vc.navigationItem.largeTitleDisplayMode = .never
+        navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    //ResponseModels -> ViewModels
+    private func configureViewModels(newAlbums: [Album], playlists: [Playlist], tracks: [AudioTrack]) {
         sections.append(.newReleases(viewModels: newAlbums.compactMap({
-            return NewReleasesCellViewModel(name: $0.name,
-                                            artworkURL: URL(string: $0.images.first?.url ?? ""),
-                                            numberOfTracks: $0.total_tracks,
-                                            artistName: $0.artists.first?.name ?? "-")
-             })))
-        sections.append(.featuredPlaylists(viewModels: []))
-        sections.append(.recommendedTracks(viewModels: []))
+            return NewReleasesCellViewModel(
+                name: $0.name,
+                artworkURL: URL(string: $0.images.first?.url ?? ""),
+                numberOfTracks: $0.total_tracks,
+                artistName: $0.artists.first?.name ?? "-")
+        })))
+        sections.append(.featuredPlaylists(viewModels: playlists.compactMap({
+            return FeaturedPlaylistCellViewModel(
+                name: $0.name,
+                artworkURL: URL(string: $0.images.first?.url ?? "-") ,
+                creatorName: $0.owner.display_name)
+        })))
+        sections.append(.recommendedTracks(viewModels: tracks.compactMap({
+            return RecommendedTrackCellViewModel(
+                name: $0.name,
+                artistName: $0.artists.first?.name ?? "-",
+                artworkURL: URL(string: $0.album.images.first?.url ?? "-"))
+        })))
         collectionView.reloadData()
     }
 }
@@ -161,7 +173,6 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
         case .recommendedTracks(let viewModels):
             return viewModels.count
         }
-        return 6
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -175,9 +186,9 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
             }
             let viewModel = viewModels[indexPath.row]
             cell.configure(with: viewModel)
-
+            
             return cell
-
+            
         case .featuredPlaylists(let viewModels):
             guard let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: FeaturedPlaylistsCollectionViewCell.identifier,
@@ -185,9 +196,9 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
                 return UICollectionViewCell()
             }
             let viewModel = viewModels[indexPath.row]
-            cell.backgroundColor = .green
+            cell.configure(with: viewModel)
             return cell
-
+            
         case .recommendedTracks(let viewModels):
             guard let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: RecommendedTrackCollectionViewCell.identifier,
@@ -195,7 +206,7 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
                 return UICollectionViewCell()
             }
             let viewModel = viewModels[indexPath.row]
-            cell.backgroundColor = .blue
+            cell.configure(with: viewModel)
             return cell
         }
     }
@@ -218,7 +229,7 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
                     heightDimension: .absolute(360)),
                 subitem: item,
                 count: 3)
-            //Horizontal Group
+            //Final Horizontal Group
             let horizontalGroup = NSCollectionLayoutGroup.horizontal(
                 layoutSize: NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(0.9),
@@ -230,51 +241,44 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
             section.orthogonalScrollingBehavior = .groupPaging
             return section
         case 1:
+            //Featured Playlists
             //Item
             let item = NSCollectionLayoutItem(layoutSize: NSCollectionLayoutSize(
                 widthDimension: .fractionalWidth(1),
                 heightDimension: .fractionalHeight(1)))
-            item.contentInsets = NSDirectionalEdgeInsets(top: 5, leading: 5, bottom: 5, trailing: 5)
-            //Vertical Group
-            //            let verticalGroup = NSCollectionLayoutGroup.vertical(
-            //                layoutSize: NSCollectionLayoutSize(
-            //                    widthDimension: .absolute(180),
-            //                    heightDimension: .absolute(500)),
-            //                subitem: item,
-            //                count: 2)
+            item.contentInsets = NSDirectionalEdgeInsets(top: 2, leading: 2, bottom: 2, trailing: 2)
+            //Group
+            let verticalGroup = NSCollectionLayoutGroup.vertical(
+                layoutSize: NSCollectionLayoutSize(
+                    widthDimension: .fractionalWidth(1),
+                    heightDimension: .absolute(400)),
+                subitem: item,
+                count: 2)
             let horizontalGroup = NSCollectionLayoutGroup.horizontal(
                 layoutSize: NSCollectionLayoutSize(
-                    widthDimension: .absolute(180),
-                    heightDimension: .absolute(250)),
-                subitem: item,
-                count: 1)
+                    widthDimension: .fractionalWidth(1),
+                    heightDimension: .absolute(400)),
+                subitem: verticalGroup,
+                count: 2)
+
             //Section
             let section = NSCollectionLayoutSection(group: horizontalGroup)
             section.orthogonalScrollingBehavior = .continuous
             return section
-        case 2:
+        case 2: //Recommended Tracks
             //Item
             let item = NSCollectionLayoutItem(layoutSize: NSCollectionLayoutSize(
-                widthDimension: .fractionalWidth(1.0),
-                heightDimension: .fractionalHeight(1.0)))
+                widthDimension: .fractionalWidth(1),
+                heightDimension: .fractionalHeight(1)))
             item.contentInsets = NSDirectionalEdgeInsets(top: 2, leading: 2, bottom: 2, trailing: 2)
-            //Vertical Group
-            //            let verticalGroup = NSCollectionLayoutGroup.vertical(
-            //                layoutSize: NSCollectionLayoutSize(
-            //                    widthDimension: .fractionalWidth(1.0),
-            //                    heightDimension: .absolute(130)),
-            //                subitem: item,
-            //                count: 1)
-            let horizontalGroup = NSCollectionLayoutGroup.horizontal(
+            let verticalGroup = NSCollectionLayoutGroup.vertical(
                 layoutSize: NSCollectionLayoutSize(
-                    widthDimension: .fractionalWidth(0.9),
-                    heightDimension: .absolute(130)),
+                    widthDimension: .fractionalWidth(1.0),
+                    heightDimension: .absolute(100)),
                 subitem: item,
                 count: 1)
             //Section
-            let section = NSCollectionLayoutSection(group: horizontalGroup)
-            section.orthogonalScrollingBehavior = .continuous
-            
+            let section = NSCollectionLayoutSection(group: verticalGroup)
             return section
         default:
             //Item
@@ -289,7 +293,6 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
                     heightDimension: .absolute(130)),
                 subitem: item,
                 count: 3)
-            
             //Section
             let section = NSCollectionLayoutSection(group: group)
             return section
