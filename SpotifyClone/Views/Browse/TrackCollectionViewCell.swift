@@ -7,8 +7,8 @@
 
 import UIKit
 import SDWebImage
-class RecommendedTrackCollectionViewCell: UICollectionViewCell {
-    static let identifier = "RecommendedTrackCollectionViewCell"
+class TrackCollectionViewCell: UICollectionViewCell {
+    static let identifier = "TrackCollectionViewCell"
     
     private let trackNameLabel: UILabel = {
         let label = UILabel()
