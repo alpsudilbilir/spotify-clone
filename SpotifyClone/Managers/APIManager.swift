@@ -37,6 +37,56 @@ final class APIManager {
             completion(request)
         }
     }
+    
+    //MARK: - Albums
+    
+    func getAlbumDetails(album: Album, completion: @escaping(Result<AlbumDetailsResponse,Error>) -> Void) {
+        createRequest(with: URL(string: Constants.baseAPIURL + "/albums/\(album.id)"), type: .GET) { request in
+            let task = URLSession.shared.dataTask(with: request) { data, _, err in
+                guard let data = data else {
+                    completion(.failure(APIError.failedToGetData))
+                    return
+                }
+                do {
+                    let result = try JSONDecoder().decode(AlbumDetailsResponse.self, from: data)
+                    print(result)
+                    completion(.success(result))
+                } catch {
+                    print(error.localizedDescription)
+                    completion(.failure(error))
+                }
+
+            }
+            task.resume()
+        }
+    }
+    //MARK: - Playlists
+    
+    func getPlaylistDetails(playlist: Playlist, completion: @escaping(Result<PlaylistDetailsResponse, Error>) -> Void) {
+        createRequest(with: URL(string: Constants.baseAPIURL + "/playlists/\(playlist.id)"), type: .GET) { request in
+            let task = URLSession.shared.dataTask(with: request) { data, _, err in
+                guard let data = data else {
+                    print(APIError.failedToGetData)
+                    return
+                }
+                do {
+                    let result = try JSONDecoder().decode(PlaylistDetailsResponse.self, from: data)
+                    print(result)
+                    completion(.success(result))
+                } catch {
+                    print(error.localizedDescription)
+                    completion(.failure(error))
+                }
+
+            }
+            task.resume()
+        }
+    }
+    
+    //MARK: - Track
+    
+    // MARK: -Profile
+    
     func getCurrentUserProfile(completion: @escaping (Result<UserProfile, Error>) -> Void) {
     createRequest(with: URL(string: Constants.baseAPIURL + "/me"), type: .GET) { baseRequest in
         let task = URLSession.shared.dataTask(with: baseRequest) { data, _, err in
@@ -55,6 +105,9 @@ final class APIManager {
         task.resume()
     }
 }
+    
+    // MARK: - Browse
+    
     func getNewReleases(completion: @escaping (Result<NewReleasesResponse, Error>) -> Void) {
         createRequest(with: URL(string: Constants.baseAPIURL + "/browse/new-releases?limit=50"), type: .GET) { request in
             let task = URLSession.shared.dataTask(with: request) { data, _, err in
