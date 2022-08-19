@@ -49,7 +49,6 @@ final class APIManager {
                 }
                 do {
                     let result = try JSONDecoder().decode(AlbumDetailsResponse.self, from: data)
-                    print(result)
                     completion(.success(result))
                 } catch {
                     print(error.localizedDescription)
@@ -71,7 +70,6 @@ final class APIManager {
                 }
                 do {
                     let result = try JSONDecoder().decode(PlaylistDetailsResponse.self, from: data)
-                    print(result)
                     completion(.success(result))
                 } catch {
                     print(error.localizedDescription)
