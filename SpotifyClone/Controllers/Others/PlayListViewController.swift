@@ -82,7 +82,6 @@ extension PlayListViewController: UICollectionViewDelegate, UICollectionViewData
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TrackCollectionViewCell.identifier, for: indexPath) as? TrackCollectionViewCell else {
-            print("No cell")
             return UICollectionViewCell()
         }
         cell.configure(with: viewModels[indexPath.row])
