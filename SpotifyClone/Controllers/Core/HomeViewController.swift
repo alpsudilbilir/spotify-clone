@@ -124,6 +124,9 @@ class HomeViewController: UIViewController {
                                 forCellWithReuseIdentifier: FeaturedPlaylistsCollectionViewCell.identifier)
         collectionView.register(TrackCollectionViewCell.self,
                                 forCellWithReuseIdentifier: TrackCollectionViewCell.identifier)
+        collectionView.register(HomeHeadersCollectionReusableView.self,
+                                forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+                                withReuseIdentifier: HomeHeadersCollectionReusableView.identifier)
         collectionView.dataSource = self
         collectionView.delegate = self
         collectionView.backgroundColor = .systemBackground
@@ -168,6 +171,20 @@ class HomeViewController: UIViewController {
 }
 
 extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSource {
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        sections.count
+    }
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        let type = sections[section]
+        switch type {
+        case .newReleases(let viewModels):
+            return viewModels.count
+        case .featuredPlaylists(let viewModels):
+            return viewModels.count
+        case .recommendedTracks(let viewModels):
+            return viewModels.count
+        }
+    }
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
         let section = sections[indexPath.section]
@@ -190,18 +207,6 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
         case .recommendedTracks: break
         }
     }
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        let type = sections[section]
-        switch type {
-        case .newReleases(let viewModels):
-            return viewModels.count
-        case .featuredPlaylists(let viewModels):
-            return viewModels.count
-        case .recommendedTracks(let viewModels):
-            return viewModels.count
-        }
-    }
-    
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let type = sections[indexPath.section]
         switch type {
@@ -237,11 +242,34 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
             return cell
         }
     }
-    func numberOfSections(in collectionView: UICollectionView) -> Int {
-        sections.count
+
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        guard let header = collectionView.dequeueReusableSupplementaryView(
+            ofKind: kind,
+            withReuseIdentifier: HomeHeadersCollectionReusableView.identifier,
+            for: indexPath) as? HomeHeadersCollectionReusableView,
+              kind == UICollectionView.elementKindSectionHeader else {
+            return UICollectionReusableView()
+        }
+        let type = sections[indexPath.section]
+        switch type {
+        case .newReleases:
+            header.configure(with: "New Releases")
+        case .featuredPlaylists:
+            header.configure(with: "Featured Playlists")
+        case .recommendedTracks:
+            header.configure(with: "Recommended Tracks")
+        }
+        return header
     }
     
     static func createSectionLayout(section: Int) -> NSCollectionLayoutSection {
+        let sectionBoundaryItem = [NSCollectionLayoutBoundarySupplementaryItem(
+            layoutSize: NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1),
+                heightDimension: .absolute(40)),
+            elementKind: UICollectionView.elementKindSectionHeader,
+            alignment: .top) ]
         switch section {
         case 0: // New Releases
             //Item
@@ -266,6 +294,7 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
             //Section
             let section = NSCollectionLayoutSection(group: horizontalGroup)
             section.orthogonalScrollingBehavior = .groupPaging
+            section.boundarySupplementaryItems = sectionBoundaryItem
             return section
         case 1:
             //Featured Playlists
@@ -291,6 +320,7 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
             //Section
             let section = NSCollectionLayoutSection(group: horizontalGroup)
             section.orthogonalScrollingBehavior = .continuous
+            section.boundarySupplementaryItems = sectionBoundaryItem
             return section
         case 2: //Recommended Tracks
             //Item
@@ -306,6 +336,7 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
                 count: 1)
             //Section
             let section = NSCollectionLayoutSection(group: verticalGroup)
+            section.boundarySupplementaryItems = sectionBoundaryItem
             return section
         default:
             //Item
