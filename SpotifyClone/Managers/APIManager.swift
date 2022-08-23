@@ -38,6 +38,45 @@ final class APIManager {
         }
     }
     
+    
+    //MARK: - Categories
+    func getAllCategories(completion: @escaping(Result<CategoryResponse, Error>) -> Void) {
+        createRequest(with: URL(string:Constants.baseAPIURL + "/browse/categories"), type: .GET) { request in
+            let task = URLSession.shared.dataTask(with: request) { data, _, err in
+                guard let data = data else {
+                    print(APIError.failedToGetData)
+                    return
+                }
+                do {
+                    let result = try JSONDecoder().decode(CategoryResponse.self, from: data)
+                    completion(.success(result))
+                } catch {
+                    completion(.failure(error))
+                }
+
+            }
+            task.resume()
+        }
+    }
+    func getCategoryPlaylist(category: Category, completion: @escaping(Result<[Playlist], Error>) -> Void) {
+        createRequest(with: URL(string:Constants.baseAPIURL + "/browse/categories/\(category.id)/playlists"), type: .GET) { request in
+            let task = URLSession.shared.dataTask(with: request) { data, _, err in
+                guard let data = data else {
+                    print(APIError.failedToGetData)
+                    return
+                }
+                do {
+                    let result = try JSONDecoder().decode(CategoryPlaylistResponse.self, from: data)
+                    let playlists = result.playlists.items
+                    completion(.success(playlists))
+                } catch {
+                    completion(.failure(error))
+                }
+            }
+            task.resume()
+        }
+    }
+    
     //MARK: - Albums
     
     func getAlbumDetails(album: Album, completion: @escaping(Result<AlbumDetailsResponse,Error>) -> Void) {

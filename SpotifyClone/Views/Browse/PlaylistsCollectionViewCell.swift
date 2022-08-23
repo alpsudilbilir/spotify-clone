@@ -7,7 +7,7 @@
 
 import UIKit
 import SDWebImage
-class FeaturedPlaylistsCollectionViewCell: UICollectionViewCell {
+class PlaylistsCollectionViewCell: UICollectionViewCell {
     static let identifier = "FeaturedPlaylistsCollectionViewCell"
     
     private var playlistCoverImageView: UIImageView = {
