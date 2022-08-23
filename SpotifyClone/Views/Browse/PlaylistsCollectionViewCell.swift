@@ -13,7 +13,7 @@ class PlaylistsCollectionViewCell: UICollectionViewCell {
     private var playlistCoverImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage()
-        imageView.contentMode = .scaleToFill
+        imageView.contentMode = .scaleAspectFill
         return imageView
     }()
     
@@ -42,7 +42,7 @@ class PlaylistsCollectionViewCell: UICollectionViewCell {
 
     }
     
-    func configure(with viewModel: FeaturedPlaylistCellViewModel) {
+    func configure(with viewModel: PlaylistCellViewModel) {
         playlistCoverImageView.sd_setImage(with: viewModel.artworkURL)
     }
 }
