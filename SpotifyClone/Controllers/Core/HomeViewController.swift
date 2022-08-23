@@ -9,7 +9,7 @@ import UIKit
 
 enum BrowseSectionType {
     case newReleases(viewModels: [NewReleasesCellViewModel])
-    case featuredPlaylists(viewModels: [FeaturedPlaylistCellViewModel])
+    case featuredPlaylists(viewModels: [PlaylistCellViewModel])
     case recommendedTracks(viewModels: [RecommendedTrackCellViewModel])
 }
 class HomeViewController: UIViewController {
@@ -120,8 +120,8 @@ class HomeViewController: UIViewController {
         view.addSubview(collectionView)
         collectionView.register(NewReleaseCollectionViewCell.self,
                                 forCellWithReuseIdentifier: NewReleaseCollectionViewCell.identifier)
-        collectionView.register(FeaturedPlaylistsCollectionViewCell.self,
-                                forCellWithReuseIdentifier: FeaturedPlaylistsCollectionViewCell.identifier)
+        collectionView.register(PlaylistsCollectionViewCell.self,
+                                forCellWithReuseIdentifier: PlaylistsCollectionViewCell.identifier)
         collectionView.register(TrackCollectionViewCell.self,
                                 forCellWithReuseIdentifier: TrackCollectionViewCell.identifier)
         collectionView.register(HomeHeadersCollectionReusableView.self,
@@ -155,7 +155,7 @@ class HomeViewController: UIViewController {
                 artistName: $0.artists.first?.name ?? "-")
         })))
         sections.append(.featuredPlaylists(viewModels: playlists.compactMap({
-            return FeaturedPlaylistCellViewModel(
+            return PlaylistCellViewModel(
                 name: $0.name,
                 artworkURL: URL(string: $0.images.first?.url ?? "-") ,
                 creatorName: $0.owner.display_name)
@@ -223,8 +223,8 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
             
         case .featuredPlaylists(let viewModels):
             guard let cell = collectionView.dequeueReusableCell(
-                withReuseIdentifier: FeaturedPlaylistsCollectionViewCell.identifier,
-                for: indexPath) as? FeaturedPlaylistsCollectionViewCell else {
+                withReuseIdentifier: PlaylistsCollectionViewCell.identifier,
+                for: indexPath) as? PlaylistsCollectionViewCell else {
                 return UICollectionViewCell()
             }
             let viewModel = viewModels[indexPath.row]
