@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SafariServices
 
 class SearchViewController: UIViewController, UISearchResultsUpdating, UISearchBarDelegate {
 
@@ -42,15 +43,19 @@ class SearchViewController: UIViewController, UISearchResultsUpdating, UISearchB
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         view.backgroundColor = .systemBackground
+        
         searchController.searchBar.delegate = self
         searchController.searchResultsUpdater = self
         navigationItem.searchController = searchController
+        
         view.addSubview(collectionView)
         collectionView.register(CategoryCollectionViewCell.self, forCellWithReuseIdentifier: CategoryCollectionViewCell.identifier)
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.backgroundColor = .systemBackground
+        
         fetchData()
     }
     private func fetchData() {
@@ -107,11 +112,16 @@ class SearchViewController: UIViewController, UISearchResultsUpdating, UISearchB
 
 
     //MARK: - SearchResults Delegate
+
 extension SearchViewController: SearchresultsViewControllerDelegate {
     func didTapResult(_ result: SearchResult) {
         switch result {
-        case .artist(let model):
-            break
+        case .artist(let artist):
+            guard let url = URL(string: artist.external_urls["spotify"] ?? "") else {
+                return
+            }
+            let vc = SFSafariViewController(url: url)
+            present(vc, animated: true)
         case .album(let model):
             let vc = AlbumViewController(album: model)
             navigationController?.pushViewController(vc, animated: true)
