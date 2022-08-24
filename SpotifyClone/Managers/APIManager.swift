@@ -38,8 +38,39 @@ final class APIManager {
         }
     }
     
+    //MARK: - Search
+    
+    func search(with query: String, completion: @escaping (Result<[SearchResult], Error>) -> Void) {
+        createRequest(with: URL(
+            string: Constants.baseAPIURL + "/search?limit=10&type=album,artist,playlist,track&q=\(query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"),
+                      type: .GET) { request in
+            print(request.url?.absoluteString ?? "none")
+            let task = URLSession.shared.dataTask(with: request) { data, _, err in
+                guard let data = data else {
+                    print(APIError.failedToGetData)
+                    return
+                }
+                do {
+                    let result = try JSONDecoder().decode(SearchResultResponse.self, from: data)
+                    var searchResults: [SearchResult] = []
+                    searchResults.append(contentsOf: result.tracks.items.compactMap({ .track(model: $0 )}))
+                    searchResults.append(contentsOf: result.albums.items.compactMap({ .album(model: $0 )}))
+                    searchResults.append(contentsOf: result.playlists.items.compactMap({ .playlist(model: $0 )}))
+                    searchResults.append(contentsOf: result.artists.items.compactMap({ .artist(model: $0 )}))
+                    
+                    completion(.success(searchResults))
+                } catch {
+                    completion(.failure(error))
+                }
+            }
+            task.resume()
+        }
+    }
+
+    
     
     //MARK: - Categories
+    
     func getAllCategories(completion: @escaping(Result<CategoryResponse, Error>) -> Void) {
         createRequest(with: URL(string:Constants.baseAPIURL + "/browse/categories"), type: .GET) { request in
             let task = URLSession.shared.dataTask(with: request) { data, _, err in
@@ -77,7 +108,7 @@ final class APIManager {
         }
     }
     
-    //MARK: - Albums
+    //MARK: Albums
     
     func getAlbumDetails(album: Album, completion: @escaping(Result<AlbumDetailsResponse,Error>) -> Void) {
         createRequest(with: URL(string: Constants.baseAPIURL + "/albums/\(album.id)"), type: .GET) { request in
@@ -120,7 +151,7 @@ final class APIManager {
         }
     }
     
-    //MARK: - Track
+    // MARK: - Track
     
     // MARK: -Profile
     
