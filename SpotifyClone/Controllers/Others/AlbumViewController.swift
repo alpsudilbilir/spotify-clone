@@ -11,7 +11,8 @@ class AlbumViewController: UIViewController {
     
     private let album: Album
     private var viewModels = [AlbumDetailsCellViewModel]()
-    
+    private var tracks = [AudioTrack]()
+
     private let collectionView = UICollectionView(
         frame: .zero,
         collectionViewLayout: AlbumViewController.createLayout())
@@ -40,6 +41,7 @@ class AlbumViewController: UIViewController {
             DispatchQueue.main.async {
                 switch result {
                 case .success(let model):
+                    self.tracks = model.tracks.items
                     self.viewModels = model.tracks.items.compactMap({
                         return AlbumDetailsCellViewModel(
                             trackName: $0.name,
@@ -68,7 +70,8 @@ extension AlbumViewController: UICollectionViewDelegate, UICollectionViewDataSou
     }
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
-        //Play
+        let track = tracks[indexPath.row]
+        PlaybackPresenter.startPlayback(from: self, track: track)
     }
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(
@@ -127,7 +130,7 @@ extension AlbumViewController: UICollectionViewDelegate, UICollectionViewDataSou
 }
 extension AlbumViewController: AlbumHeaderCollectionReusableViewDelegate {
     func albumHeaderCollectionReusableViewDidTapPlayAll(_ header: AlbumHeaderCollectionReusableView) {
-        print("Play all")
+        PlaybackPresenter.startPlayback(from: self, tracks: tracks)
     }
     
     

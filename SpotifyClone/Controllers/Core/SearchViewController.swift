@@ -122,14 +122,14 @@ extension SearchViewController: SearchresultsViewControllerDelegate {
             }
             let vc = SFSafariViewController(url: url)
             present(vc, animated: true)
-        case .album(let model):
-            let vc = AlbumViewController(album: model)
+        case .album(let album):
+            let vc = AlbumViewController(album: album)
             navigationController?.pushViewController(vc, animated: true)
-        case .playlist(let model):
-            let vc = PlayListViewController(playlist: model)
+        case .playlist(let playlist):
+            let vc = PlayListViewController(playlist: playlist)
             navigationController?.pushViewController(vc, animated: true)
-        case .track(let model):
-            break
+        case .track(let track):
+            PlaybackPresenter.startPlayback(from: self, track: track)
             
         }
     }
