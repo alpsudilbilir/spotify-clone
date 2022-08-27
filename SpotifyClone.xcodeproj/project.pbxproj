@@ -187,19 +187,19 @@
 		154EEFBB28A4022500F95954 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				154EEFDB28A4059D00F95954 /* PlayList.swift */,
-				154EEFDD28A405AA00F95954 /* AudioTrack.swift */,
 				154EEFDF28A405B300F95954 /* Artist.swift */,
-				154EEFE128A405BD00F95954 /* UserProfile.swift */,
+				154EEFDD28A405AA00F95954 /* AudioTrack.swift */,
 				154EEFE528A434D600F95954 /* AuthResponse.swift */,
+				154EEFDB28A4059D00F95954 /* PlayList.swift */,
+				154EEFE128A405BD00F95954 /* UserProfile.swift */,
 				1560814328A679F500834293 /* SettingsModels.swift */,
 				154E309A28A7D50E00BFF1E0 /* APIImage.swift */,
 				154E309828A7C62600BFF1E0 /* NewReleasesResponse.swift */,
 				15B32B6728A7DD1000B2ED8C /* FeaturedPlaylistsResponse.swift */,
 				15B32B6928A7E71A00B2ED8C /* RecommendedGenresResponse.swift */,
 				15B32B6B28A7EB2C00B2ED8C /* RecommendationsResponse.swift */,
-				159543C128AE963F008C9FC4 /* AlbumDetailsResponse.swift */,
 				15227A0228B0159F00CD44F3 /* PlaylistDetailsResponse.swift */,
+				159543C128AE963F008C9FC4 /* AlbumDetailsResponse.swift */,
 				15D94A2928B4FC1B006FD65A /* CategoryResponse.swift */,
 				15D94A2F28B50939006FD65A /* Category.swift */,
 				15D94A3128B50BA3006FD65A /* CategoryPlaylistResponse.swift */,

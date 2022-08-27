@@ -12,15 +12,22 @@ protocol PlayerControlsViewDelegate: AnyObject {
     func playerControlsViewDidTapPlayPause(_ playerControlsView: PlayerControlsView)
     func playerControlsViewDİdTapForwardButton(_ playerControlsView: PlayerControlsView)
     func playerControlsViewDidTapBackButton(_ playerControlsView: PlayerControlsView)
+    func playerControlsView(_ playerControlsView: PlayerControlsView, didSlideSlider value: Float)
+}
+
+struct PlayerControlsViewViewModel {
+    let title: String?
+    let subtitle: String?
 }
 
 final class PlayerControlsView: UIView {
-    
+    private var isPlaying = true
     weak var delegate: PlayerControlsViewDelegate?
     
     private let volumeSlider: UISlider = {
         let slider = UISlider()
         slider.value = 0.5
+        slider.tintColor = .systemGreen
         return slider
     }()
     
@@ -49,9 +56,10 @@ final class PlayerControlsView: UIView {
         return button
     }()
     
-    private let playPauseButton: UIButton = {
+    let playPauseButton: UIButton = {
         let button = UIButton()
         button.tintColor = .label
+        let imageName = PlaybackPresenter.shared.player?.timeControlStatus == .playing ? "pause.circle.fill" : "arrowtriangle.forward.fill"
         let image = UIImage(systemName: "pause.circle.fill", withConfiguration: UIImage.SymbolConfiguration(pointSize: 55, weight: .regular))
         button.setImage(image, for: .normal)
         button.layer.cornerRadius = 55 / 2
@@ -79,6 +87,7 @@ final class PlayerControlsView: UIView {
         backwardButton.addTarget(self, action: #selector(didTapBackward), for: .touchUpInside)
         forwardButton.addTarget(self, action: #selector(didTapForward), for: .touchUpInside)
         playPauseButton.addTarget(self, action: #selector(didTapPlayPause), for: .touchUpInside)
+        volumeSlider.addTarget(self, action: #selector(didSlideSlider(_:)), for: .valueChanged)
         
         clipsToBounds = true
     }
@@ -95,6 +104,19 @@ final class PlayerControlsView: UIView {
     }
     @objc private func didTapPlayPause() {
         delegate?.playerControlsViewDidTapPlayPause(self)
+
+        DispatchQueue.main.async {
+            self.isPlaying.toggle()
+            let imageName = self.isPlaying ?  "pause.circle.fill" : "arrowtriangle.forward.fill"
+            self.playPauseButton.setImage(UIImage(systemName: imageName, withConfiguration: UIImage.SymbolConfiguration(pointSize: 55, weight: .regular)), for: .normal)
+        }
+
+
+    }
+    @objc private func didSlideSlider(_ slider: UISlider) {
+        let value = slider.value
+        delegate?.playerControlsView(self, didSlideSlider: value)
+        
     }
     
     override func layoutSubviews() {
@@ -134,5 +156,9 @@ final class PlayerControlsView: UIView {
             y: volumeSlider.bottom + 30,
             width: buttonSize,
             height: buttonSize)
+    }
+    func configure(with viewModel: PlayerControlsViewViewModel) {
+        self.nameLabel.text = viewModel.title
+        self.subtitleLabel.text = viewModel.subtitle
     }
 }

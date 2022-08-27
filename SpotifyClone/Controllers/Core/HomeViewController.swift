@@ -206,7 +206,7 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
             break
         case .recommendedTracks:
             let track = tracks[indexPath.row]
-            PlaybackPresenter.startPlayback(from: self, track: track)
+            PlaybackPresenter.shared.startPlayback(from: self, track: track)
         }
     }
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
