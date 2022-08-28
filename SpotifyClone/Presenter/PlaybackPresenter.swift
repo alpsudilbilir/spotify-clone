@@ -27,7 +27,6 @@ final class PlaybackPresenter {
             return track
         }
         else if let player = self.playerQueue,  !tracks.isEmpty {
-     
             return tracks[index]
         }
         return nil
@@ -37,6 +36,8 @@ final class PlaybackPresenter {
     var player: AVPlayer?
     var playerQueue: AVQueuePlayer?
     var index = 0
+    
+    
     // Single Tracks
     func startPlayback(from viewController: UIViewController, track: AudioTrack) {
         
@@ -109,7 +110,12 @@ extension PlaybackPresenter: PlayerViewControllerDelegate {
             player?.pause()
         } else if let player = playerQueue {
             player.advanceToNextItem()
-            index += 1
+            if index < tracks.count {
+                index += 1
+            } else {
+                index = 0
+            }
+            
             playerVC?.refreshUI()
         }
     }
@@ -122,9 +128,11 @@ extension PlaybackPresenter: PlayerViewControllerDelegate {
             player = AVPlayer(url: url)
             player?.play()
         } else if let firstItem = playerQueue?.items().first {
+            let randomTrack = tracks.randomElement()
             playerQueue?.pause()
             playerQueue?.removeAllItems()
-            playerQueue = AVQueuePlayer(items: [firstItem])
+            guard let url = URL(string: randomTrack?.preview_url ?? "-") else { return }
+            playerQueue = AVQueuePlayer(items: [AVPlayerItem(url: url )])
             playerQueue?.play()
         }
         
