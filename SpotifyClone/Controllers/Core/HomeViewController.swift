@@ -18,7 +18,7 @@ class HomeViewController: UIViewController {
     private var playlists: [Playlist] = []
     private var tracks: [AudioTrack] = []
     private var sections = [BrowseSectionType]()
-
+    
     private var collectionView: UICollectionView = UICollectionView(
         frame: .zero,
         collectionViewLayout: UICollectionViewCompositionalLayout(sectionProvider: { sectionIndex, _ -> NSCollectionLayoutSection? in
@@ -39,10 +39,43 @@ class HomeViewController: UIViewController {
             image: UIImage(systemName: "gear"),
             style: .done,
             target: self,
-            action: #selector(didTapSettings))
+            action: #selector(didLongPress(_:)))
         configureCollectionView()
         view.addSubview(spinner)
         fetchData()
+        addLongTapGesture()
+    }
+    private func addLongTapGesture() {
+        let gesture = UILongPressGestureRecognizer(target: self, action: #selector(didLongPress))
+        collectionView.isUserInteractionEnabled = true
+        collectionView.addGestureRecognizer(gesture)
+    }
+    @objc func didLongPress(_ gesture: UILongPressGestureRecognizer) {
+        guard gesture.state == .began else {
+            return
+        }
+        let touchPoint = gesture.location(in: collectionView)
+        guard let indexPath = collectionView.indexPathForItem(at: touchPoint),
+              indexPath.section == 2 else { return }
+        let model = tracks[indexPath.row]
+        
+        //Action Sheet
+        let actionSheet = UIAlertController(title: model.name, message: "Would you like to add this to a playlist?", preferredStyle: .actionSheet)
+        actionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        actionSheet.addAction(UIAlertAction(title: "Add to Playlist", style: .default, handler: { [weak self] _ in
+            let vc = LibraryPlaylistViewController()
+            vc.selectionHandler =  { playlist in
+                APIManager.shared.addTrackToPlaylist(
+                    track: model,
+                    playlist: playlist) { succes in
+                     print("Added to playlist success: \(succes)")
+                }
+            }
+            vc.title = "Select Playlist"
+            self?.present(UINavigationController(rootViewController: vc), animated: true)
+        }))
+        
+        present(actionSheet, animated: true)
     }
     private func fetchData() {
         let group = DispatchGroup()
@@ -190,7 +223,7 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
         let section = sections[indexPath.section]
         switch section {
         case .newReleases:
-           
+            
             let album = newAlbums[indexPath.row]
             let vc = AlbumViewController(album: album)
             vc.title = album.name
@@ -244,7 +277,7 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
             return cell
         }
     }
-
+    
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         guard let header = collectionView.dequeueReusableSupplementaryView(
             ofKind: kind,
@@ -318,7 +351,7 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
                     heightDimension: .absolute(400)),
                 subitem: verticalGroup,
                 count: 2)
-
+            
             //Section
             let section = NSCollectionLayoutSection(group: horizontalGroup)
             section.orthogonalScrollingBehavior = .continuous

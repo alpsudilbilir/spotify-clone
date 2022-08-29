@@ -10,6 +10,7 @@ import UIKit
 class LibraryPlaylistViewController: UIViewController {
     var playlists = [Playlist]()
     
+    var selectionHandler: ((Playlist) -> Void)?
     private let noPlaylistsView = ActionLabelView()
     
     private let tableView: UITableView = {
@@ -28,6 +29,10 @@ class LibraryPlaylistViewController: UIViewController {
         tableView.dataSource = self
         setNoPlaylistView()
         fetchPlaylists()
+        
+        if selectionHandler != nil {
+            navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(didTapDismiss))
+        }
     }
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
@@ -39,7 +44,9 @@ class LibraryPlaylistViewController: UIViewController {
             height: 150)
         noPlaylistsView.center = view.center
     }
-    
+    @objc private func didTapDismiss() {
+        dismiss(animated: true)
+    }
     private func setNoPlaylistView() {
         view.addSubview(noPlaylistsView)
         noPlaylistsView.configure(with: ActionLabelViewViewModel(text: "You don't have any playlists yet.", actionTitle: "Create"))
@@ -89,7 +96,7 @@ class LibraryPlaylistViewController: UIViewController {
                         print("Failed to create playlist.")
                     }
                 }
-        
+                
                 
             }
         }))
@@ -126,8 +133,37 @@ extension LibraryPlaylistViewController: UITableViewDelegate, UITableViewDataSou
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let playlist = playlists[indexPath.row]
+        guard selectionHandler == nil else {
+            selectionHandler?(playlist)
+            dismiss(animated: true)
+            return
+        }
         let vc = PlayListViewController(playlist: playlist)
+        vc.navigationItem.largeTitleDisplayMode = .never
+        vc.isOwner = true
         navigationController?.pushViewController(vc, animated: true)
+    }
+    func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+        let playlistToUnfollow = playlists[indexPath.row]
+        let config = UIContextMenuConfiguration(identifier: playlistToUnfollow.id as NSString, previewProvider: nil) { _ in
+            let deleteAction = UIAction(
+                title: "Unfollow",
+                image: UIImage(systemName: "minus.circle")) { [weak self] action in
+                    APIManager.shared.unfollowPlaylist(playlist: playlistToUnfollow) { success in
+                        DispatchQueue.main.async {
+                            if success {
+                                self?.playlists.remove(at: indexPath.row)
+                                self?.tableView.reloadData()
+                            } else {
+                                print("Failed to unfollow")
+                            }
+                            
+                        }
+                    }
+                }
+            return UIMenu(title: "", children: [deleteAction])
+        }
+        return config
     }
     
 }

@@ -110,7 +110,7 @@ extension PlaybackPresenter: PlayerViewControllerDelegate {
             player?.pause()
         } else if let player = playerQueue {
             player.advanceToNextItem()
-            if index < tracks.count {
+            if index < tracks.count - 1 {
                 index += 1
             } else {
                 index = 0

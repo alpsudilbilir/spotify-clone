@@ -12,6 +12,8 @@ class PlayListViewController: UIViewController {
     private let playlist: Playlist
     private var viewModels = [RecommendedTrackCellViewModel]()
     private var tracks = [AudioTrack]()
+    
+    var isOwner = false
 
     private let collectionView = UICollectionView(
         frame: .zero,
@@ -24,6 +26,8 @@ class PlayListViewController: UIViewController {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    //MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
@@ -40,6 +44,20 @@ class PlayListViewController: UIViewController {
         collectionView.register(PlaylistHeaderCollectionReusableView.self,
                                 forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
                                 withReuseIdentifier: PlaylistHeaderCollectionReusableView.identifier)
+ 
+        fetchPlaylists()
+        
+        let gesture = UILongPressGestureRecognizer(target: self, action: #selector(didLongPress(_:)))
+        collectionView.addGestureRecognizer(gesture)
+    }
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        collectionView.frame = view.bounds
+    }
+    
+
+    
+    private func fetchPlaylists() {
         APIManager.shared.getPlaylistDetails(playlist: playlist) { [weak self] result in
             DispatchQueue.main.async {
                 switch result {
@@ -58,6 +76,34 @@ class PlayListViewController: UIViewController {
             }
         }
     }
+    @objc private func didLongPress(_ gesture: UIGestureRecognizer) {
+        guard gesture.state == .began else {
+            return
+        }
+        let touchPoint = gesture.location(in: collectionView)
+        guard let indexPath = collectionView.indexPathForItem(at: touchPoint) else {
+            return
+        }
+        let trackToDelete = tracks[indexPath.row]
+        
+        let actionSheet = UIAlertController(title: trackToDelete.name, message: "Do you want to remove this track from playlist?", preferredStyle: .actionSheet)
+        present(actionSheet, animated: true)
+        actionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        actionSheet.addAction(UIAlertAction(title: "Remove", style: .destructive, handler: {[weak self] _ in
+            guard let self = self else { return }
+            APIManager.shared.removeTrackFromPlaylist(track: trackToDelete, playlist: self.playlist) { success in
+                DispatchQueue.main.async {
+                    if success {
+                        self.tracks.remove(at: indexPath.row)
+                        self.viewModels.remove(at: indexPath.row)
+                        self.collectionView.reloadData()
+                    } else {
+                        print("Failed to remove")
+                    }
+                }
+            }
+        }))
+    }
     @objc private func didTapShare() {
         guard let url = URL(string: playlist.external_urls["spotify"] ?? "") else {
             return
@@ -68,11 +114,9 @@ class PlayListViewController: UIViewController {
         vc.popoverPresentationController?.barButtonItem = navigationItem.rightBarButtonItem
         present(vc, animated: true)
     }
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        collectionView.frame = view.bounds
-    }
 }
+
+//MARK: - Collection View
 
 extension PlayListViewController: UICollectionViewDelegate, UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {

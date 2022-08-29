@@ -13,6 +13,16 @@ class LibraryAlbumsViewController: UIViewController {
         super.viewDidLoad()
 
         view.backgroundColor = .systemOrange
+        
+        APIManager.shared.getSavedAlbums { result in
+            switch result {
+            case .success(let result):
+                print(result)
+            case .failure(let error):
+                print(error)
+                
+            }
+        }
     }
 
 }
