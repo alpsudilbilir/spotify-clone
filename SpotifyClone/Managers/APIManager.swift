@@ -20,6 +20,7 @@ final class APIManager {
         case GET
         case POST
         case DELETE
+        case PUT
     }
     enum APIError: Error {
         case failedToGetData
@@ -139,13 +140,30 @@ final class APIManager {
                     return
                 }
                 do {
-                    let result = try JSONDecoder().decode(SavedAlbumResponse.self, from: data)
-                    print("DATA: \(result)")
-//                    completion(.success(result.items))
+                    let result = try JSONDecoder().decode(LibraryAlbumResponse.self, from: data)
+                    completion(.success(result.items.compactMap( { $0.album })))
                 } catch {
                     print(error.localizedDescription)
                     completion(.failure(error))
                 }
+            }
+            task.resume()
+        }
+    }
+    
+    func saveAlbum(album: Album, completion: @escaping (Bool) -> Void) {
+        createRequest(with: URL(string: Constants.baseAPIURL + "/me/albums?ids=\(album.id)"), type: .PUT) { baseRequest in
+            var request = baseRequest
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            let task = URLSession.shared.dataTask(with: request) { data, response, err in
+                guard let data = data,
+                let code = (response as? HTTPURLResponse)?.statusCode
+                else {
+                    print(APIError.failedToGetData)
+                    completion(false)
+                    return
+                }
+                completion(code == 200)
             }
             task.resume()
         }

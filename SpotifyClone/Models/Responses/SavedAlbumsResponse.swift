@@ -7,6 +7,11 @@
 
 import Foundation
 
-struct SavedAlbumResponse: Codable {
-    let items: [Album]
+struct LibraryAlbumResponse: Codable {
+    let items: [UserAlbumResponse]
+}
+
+struct UserAlbumResponse: Codable {
+    let album: Album
+    let added_at: String
 }

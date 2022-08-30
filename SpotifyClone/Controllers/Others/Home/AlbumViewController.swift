@@ -36,7 +36,26 @@ class AlbumViewController: UIViewController {
         collectionView.register(AlbumHeaderCollectionReusableView.self,
                                 forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
                                 withReuseIdentifier: AlbumHeaderCollectionReusableView.identifier)
-    
+        fetchData()
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Save", style: .done, target: self, action: #selector(didTapSave))
+    }
+    @objc private func didTapSave() {
+        let albumWillBeSaved = self.album
+        APIManager.shared.saveAlbum(album: albumWillBeSaved) { [weak self] success in
+            if success {
+                HapticsManager.shared.vibrate(for: .success)
+                print("Saved.")
+            } else {
+                HapticsManager.shared.vibrate(for: .error)
+                print("Unable to save album.")
+            }
+        }
+    }
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        collectionView.frame = view.bounds
+    }
+    private func fetchData() {
         APIManager.shared.getAlbumDetails(album: album) { result in
             DispatchQueue.main.async {
                 switch result {
@@ -53,10 +72,6 @@ class AlbumViewController: UIViewController {
                 }
             }
         }
-    }
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        collectionView.frame = view.bounds
     }
     
     
