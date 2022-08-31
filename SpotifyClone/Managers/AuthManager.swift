@@ -11,10 +11,10 @@ final class AuthManager {
     static let shared = AuthManager()
     private var refreshingToken = false
     struct Constants {
-        static let clientID = "d21277d9d560478b8f25686518fbae2d"
-        static let clientSecret =  "11d07e63fe424946b7d978416f639542"
+        static let clientID = "PASTE YOUR CLIENT ID"
+        static let clientSecret =  "PASTE YOUR SECRET ID"
         static let tokenAPIURL = "https://accounts.spotify.com/api/token"
-        static let redirectURI = "https://www.linkedin.com/in/alpsudilbilir/"
+        static let redirectURI = "https://www.linkedin.com/in/alpsudilbilir/" // Any link works
         static let scopes = "user-read-private%20playlist-modify-public%20playlist-read-private%20playlist-modify-private%20user-follow-read%20user-library-modify%20user-library-read%20user-read-email"
     }
     
