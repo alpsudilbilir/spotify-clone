@@ -17,3 +17,10 @@ git clone https://github.com/alpsudilbilir/spotify-clone.git
  - Get your client ID and client secret id.
  - Assign them to static client id and client secret id in AuthManager.
  - Run
+ 
+## GIFS
+
+![browse](https://user-images.githubusercontent.com/87194129/187753178-29d97e30-1a1f-42d9-bc47-5c11f57f2bbb.gif)
+![search](https://user-images.githubusercontent.com/87194129/187753940-1c9a2afe-48f7-4bd6-bf2d-ff3b9d1f8721.gif) 
+![library](https://user-images.githubusercontent.com/87194129/187753951-2b8c4d52-f72a-43e2-9167-9bca50dbcaa6.gif)
+
