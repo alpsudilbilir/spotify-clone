@@ -31,6 +31,7 @@ class HomeViewController: UIViewController {
         return spinner
     }()
     
+    //MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "Browse"
@@ -39,14 +40,14 @@ class HomeViewController: UIViewController {
             image: UIImage(systemName: "gear"),
             style: .done,
             target: self,
-            action: #selector(didLongPress(_:)))
+            action: #selector(didTapSettings))
         configureCollectionView()
         view.addSubview(spinner)
         fetchData()
         addLongTapGesture()
     }
     private func addLongTapGesture() {
-        let gesture = UILongPressGestureRecognizer(target: self, action: #selector(didLongPress))
+        let gesture = UILongPressGestureRecognizer(target: self, action: #selector(didLongPress(_:)))
         collectionView.isUserInteractionEnabled = true
         collectionView.addGestureRecognizer(gesture)
     }
@@ -202,6 +203,9 @@ class HomeViewController: UIViewController {
         collectionView.reloadData()
     }
 }
+
+//MARK: - Collection View
+
 
 extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {

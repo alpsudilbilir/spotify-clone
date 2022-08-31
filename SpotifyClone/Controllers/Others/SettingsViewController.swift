@@ -42,7 +42,24 @@ class SettingsViewController: UIViewController, UITableViewDelegate, UITableView
                         
     }
     private func signOutTapped() {
-        
+        let actionSheet = UIAlertController(title: "Sign Out", message: "Do you want to sign out?", preferredStyle: .actionSheet)
+        actionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        actionSheet.addAction(UIAlertAction(title: "Sign Out", style: .destructive, handler: { _ in
+            AuthManager.shared.signOut { [weak self] success in
+                if success {
+                    DispatchQueue.main.async {
+                        let navC = UINavigationController(rootViewController: WelcomeViewController())
+                        navC.navigationBar.prefersLargeTitles = true
+                        navC.modalPresentationStyle = .fullScreen
+                        self?.present(navC, animated: true, completion: {
+                            self?.navigationController?.popToRootViewController(animated: true)
+                        })
+                        
+                    }
+                }
+            }
+        }))
+        present(actionSheet, animated: true)
     }
     
     private func viewProfile() {

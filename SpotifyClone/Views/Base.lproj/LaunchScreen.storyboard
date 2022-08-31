@@ -30,6 +30,9 @@
                             <constraint firstItem="f95-75-Omd" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="Tye-zY-VjD"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="logo" destination="f95-75-Omd" id="O1g-PQ-Z1g"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -37,6 +40,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="logo" width="991" height="1023"/>
+        <image name="logo" width="512" height="512"/>
     </resources>
 </document>
